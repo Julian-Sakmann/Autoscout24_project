@@ -20,12 +20,15 @@ os.chdir(path)
 
 # Load the data
 X = pd.read_csv('cleaned_data.csv')
-
+X = X.drop('Unnamed: 0', axis=1)
 
 ## Preperation
 
 # Extract the target 'price'
 y = X.pop('price')
+
+# Remove the categorical features the have been recoded to dummy variables previously
+X = X.drop(columns = ['marke', 'model', 'fuel', 'gear', 'offerType', 'year'])
 
 # Extract feature names for later use
 feature_names = X.columns.tolist()
@@ -79,7 +82,7 @@ print('MAE:', round(mae_dt, 2))
 print("")
 
 # Visualization
-results_dt = pd.DataFrame({'Price': y_test, 'Predicted Output': y_predict_dt})
+results_dt = pd.DataFrame({'Price': y_test, 'Predicted Price': y_predict_dt})
 plt.figure(figsize=(10, 10))
 sns.regplot(data=results_dt, y='Predicted Price', x='Price', color='palevioletred', marker='o')
 plt.title("Comparison of predicted values and the actual values (Decision Tree Regressor)", fontsize=20)
@@ -124,7 +127,7 @@ print('MSE:', round(mse_rfreg, 2))
 print('MAE:', round(mae_rfreg, 2))
 
 # Visualization
-results_rf = pd.DataFrame({'Price': y_test, 'Pedicted Output': y_predict_rfreg})
+results_rf = pd.DataFrame({'Price': y_test, 'Pedicted Price': y_predict_rfreg})
 plt.figure(figsize=(10, 10))
 sns.regplot(data=results_dt, y='Predicted Price', x='Price', color='coral', marker='o')
 plt.title("Comparison of predicted values and the actual values (Random Forrest Regressor)", fontsize=20)
@@ -176,10 +179,14 @@ print("Linear Regression Prediction:", round(lr_prediction[0] * 1000, 2))
 print("Decision Tree Regression Prediction:", round(dt_reg_prediction[0] * 1000, 2))
 print("Random Forest Regression Prediction:", round(rf_reg_prediction[0] * 1000, 2))
 
+# Save the estimated models for use in the Streamlit App (this will not be pushed to GitHub, because the file is too large)
+from joblib import dump
 
-
-
-
+dump({
+    'lr_model': lr,
+    'dt_reg_model': dt_reg,
+    'rf_reg_model': rf_reg
+}, 'trained_models.joblib')
 
 
 
